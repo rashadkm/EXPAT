@@ -18,7 +18,6 @@ set(INSTALL_PKGCONFIG_DIR "${CMAKE_INSTALL_PREFIX}/share/pkgconfig" CACHE PATH "
 
 option(BUILD_SHARED_LIBS  "Build shared libs." ON)
 
-
 # configuration options
 set(XML_CONTEXT_BYTES 1024 CACHE STRING "Define to specify how much context to retain around the current parse point")
 option(XML_DTD "Define to make parameter entity parsing functionality available" ON)
@@ -73,11 +72,26 @@ install(FILES ${CMAKE_BINARY_DIR}/expat.pc DESTINATION  "${INSTALL_PKGCONFIG_DIR
 
 set(LIB_NAME expat)
 
-if(CMAKE_BUILD_TYPE STREQUAL "")
-  set(CONFIG_TYPE "NOCONFIG")
-else()
+set(CONFIG_TYPE "NOCONFIG")
+if(NOT "${CMAKE_BUILD_TYPE}" STREQUAL "")
   string(TOUPPER ${CMAKE_BUILD_TYPE} CONFIG_TYPE)
 endif()
+
+if(WIN32 AND NOT CYGWIN)
+  set(DEF_INSTALL_CMAKE_DIR CMake)
+else()
+  set(DEF_INSTALL_CMAKE_DIR lib/CMake/expat)
+endif()
+set(INSTALL_CMAKE_DIR ${DEF_INSTALL_CMAKE_DIR} CACHE PATH
+  "Installation directory for CMake files")
+ 
+# Make relative paths absolute (needed later on)
+foreach(p LIB BIN INCLUDE CMAKE)
+  set(var INSTALL_${p}_DIR)
+  if(NOT IS_ABSOLUTE "${${var}}")
+    set(${var} "${CMAKE_INSTALL_PREFIX}/${${var}}")
+  endif()
+endforeach()
 
 export(TARGETS expat
   FILE "${CMAKE_BINARY_DIR}/EXPATTargets.cmake")
@@ -90,10 +104,10 @@ file(RELATIVE_PATH REL_INCLUDE_DIR "${INSTALL_CMAKE_DIR}"
 #set(CONF_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/include")
 set(CONF_INCLUDE_DIRS "${CMAKE_INSTALL_PREFIX}/include")
 configure_file(cmake/EXPATConfig.cmake.in
-  "${PROJECT_BINARY_DIR}/EXPATConfig.cmake" @ONLY)
+  "${CMAKE_BINARY_DIR}/EXPATConfig.cmake" @ONLY)
 
 # ... for the install tree
-set(CONF_INCLUDE_DIRS "\${EXPAT_CMAKE_DIR}/${REL_INCLUDE_DIR}")
+set(CONF_INCLUDE_DIRS "\${INSTALL_CMAKE_DIR}/${REL_INCLUDE_DIR}")
 configure_file(cmake/EXPATConfig.cmake.in
   "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/EXPATConfig.cmake" @ONLY)
 # ... for both
