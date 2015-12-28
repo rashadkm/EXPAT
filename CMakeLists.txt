@@ -37,17 +37,17 @@ endif(XML_NS)
 include(ConfigureChecks.cmake)
 
 include_directories(${CMAKE_BINARY_DIR} ${CMAKE_SOURCE_DIR}/lib)
+
 if(MSVC)
-    add_definitions(-D_CRT_SECURE_NO_WARNINGS -wd4996)
-endif(MSVC)
+  add_definitions(-D_CRT_SECURE_NO_WARNINGS -wd4996)
+endif()
 
 set(expat_SRCS
     lib/xmlparse.c
     lib/xmlrole.c
     lib/xmltok.c 
     lib/xmltok_impl.c 
-    lib/xmltok_ns.c
-)
+    lib/xmltok_ns.c )
 
 if(WIN32 AND BUILD_SHARED_LIBS)
     set(expat_SRCS ${expat_SRCS} lib/libexpat.def)
@@ -55,14 +55,14 @@ endif(WIN32 AND BUILD_SHARED_LIBS)
 
 add_library(expat ${expat_SRCS})
 
-install(TARGETS expat RUNTIME DESTINATION bin
-                      LIBRARY DESTINATION lib
-                      ARCHIVE DESTINATION lib)
+install(TARGETS expat
+  EXPORT expatTargets
+  RUNTIME DESTINATION bin
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib)
 
-set(prefix ${CMAKE_INSTALL_PREFIX})
-set(exec_prefix "\${prefix}/bin")
-set(libdir "\${prefix}/lib")
-set(includedir "\${prefix}/include")
+export(TARGETS expat
+  FILE "${CMAKE_BINARY_DIR}/expatTargets.cmake")
 
 configure_file( ${CMAKE_SOURCE_DIR}/cmake/expat.pc.cmakein
   ${CMAKE_BINARY_DIR}/expat.pc @ONLY)
@@ -93,16 +93,15 @@ foreach(p LIB BIN INCLUDE CMAKE)
   endif()
 endforeach()
 
-export(TARGETS expat
-  FILE "${CMAKE_BINARY_DIR}/EXPATTargets.cmake")
-
 # Create the EXPATConfig.cmake and EXPATConfigVersion files
 file(RELATIVE_PATH REL_INCLUDE_DIR "${INSTALL_CMAKE_DIR}"
   "${INSTALL_INC_DIR}")
 
 # ... for the build tree
 #set(CONF_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/include")
+#RK: fix me
 set(CONF_INCLUDE_DIRS "${CMAKE_INSTALL_PREFIX}/include")
+
 configure_file(cmake/EXPATConfig.cmake.in
   "${CMAKE_BINARY_DIR}/EXPATConfig.cmake" @ONLY)
 
@@ -120,4 +119,4 @@ install(FILES
   DESTINATION "${INSTALL_CMAKE_DIR}" )
  
 # Install the export set for use with the install-tree
-install(EXPORT EXPATTargets DESTINATION "${INSTALL_CMAKE_DIR}")
+install(EXPORT expatTargets DESTINATION ${DEF_INSTALL_CMAKE_DIR})
