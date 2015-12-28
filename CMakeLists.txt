@@ -116,7 +116,7 @@ configure_file(cmake/EXPATConfigVersion.cmake.in
 install(FILES
   "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/EXPATConfig.cmake"
   "${CMAKE_BINARY_DIR}/EXPATConfigVersion.cmake"
-  DESTINATION "${INSTALL_CMAKE_DIR}" )
+  DESTINATION ${DEF_INSTALL_CMAKE_DIR} )
  
 # Install the export set for use with the install-tree
 install(EXPORT expatTargets DESTINATION ${DEF_INSTALL_CMAKE_DIR})
